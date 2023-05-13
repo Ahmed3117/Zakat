@@ -1,6 +1,15 @@
 from django.contrib import admin
-from .models import Item,Inbound, Outbound, Available
+from .models import Case, Item,Inbound, Outbound, Available,Donator, Status
+from django.forms import ModelForm
+from django.forms.widgets import ClearableFileInput
 
+class InboundForm(ModelForm):
+    class Meta:
+        model = Inbound
+        fields = '__all__'
+        widgets = {
+            'file': ClearableFileInput(attrs={'multiple': True}),
+        }
 
 
 class QuantityRangeFilter(admin.SimpleListFilter):
@@ -43,23 +52,44 @@ class ItemAdmin(admin.ModelAdmin):
     ordering = ('name',)
     list_per_page = 10
 admin.site.register(Item, ItemAdmin)
+class DonatorAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    list_filter = ('name',)
+    search_fields = ('name',)
+    ordering = ('name',)
+    list_per_page = 10
+admin.site.register(Donator, DonatorAdmin)
+class StatusAdmin(admin.ModelAdmin):
+    list_display = ('status',)
+    list_filter = ('status',)
+    search_fields = ('status',)
+    ordering = ('status',)
+    list_per_page = 10
+admin.site.register(Status, StatusAdmin)
+class CaseAdmin(admin.ModelAdmin):
+    list_display = ('name','status', 'date_added')
+    list_filter = ('name','status__status', 'date_added')
+    search_fields = ('name','status__status')
+    ordering = ('name','status', 'date_added')
+    list_per_page = 10
+admin.site.register(Case, CaseAdmin)
 
 @admin.register(Inbound)
 class InboundAdmin(admin.ModelAdmin):
-    list_display = ('item', 'quantity', 'date')
+    list_display = ('item','donator', 'quantity', 'date','file')
     list_filter = ('item', 'quantity', 'date', QuantityRangeFilter)
     change_list_template = 'admin/change_list.html'
-    search_fields = ('item__name',)
+    search_fields = ('item__name','donator__name')
     ordering = ('item', 'quantity', 'date')
     list_per_page = 10
 
 @admin.register(Outbound)
 class OutbounddAdmin(admin.ModelAdmin):
-    list_display = ('item', 'quantity', 'date')
-    list_filter = ('item', 'quantity', 'date', QuantityRangeFilter)
+    list_display = ('item', 'case' ,'quantity', 'date','file')
+    list_filter = ('item', 'quantity', 'case__name','case__status__status', 'date', QuantityRangeFilter)
     change_list_template = 'admin/change_list.html'
-    search_fields = ('item__name',)
-    ordering = ('item', 'quantity', 'date')
+    search_fields = ('item__name','case__status__status')
+    ordering = ('item','quantity', 'date')
     list_per_page = 10
 
 @admin.register(Available)

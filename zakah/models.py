@@ -11,6 +11,21 @@ class Item(models.Model):
     name = models.CharField(max_length=50)
     def __str__(self):
         return self.name
+class Donator(models.Model):
+    name = models.CharField(max_length=50)
+    def __str__(self):
+        return self.name
+class Status(models.Model):
+    status = models.CharField(max_length=50) # يتيم و مريض و ....
+    def __str__(self):
+        return self.status
+class Case(models.Model):
+    name = models.CharField(max_length=50) # يتيم و مريض و ....
+    status = models.ForeignKey(Status, on_delete=models.CASCADE)
+    notes = models.TextField(max_length=1000,null=True,blank=True)
+    date_added = models.DateTimeField(auto_now=True)
+    def __str__(self):
+        return self.name + " " + self.status.status
 
 
 @receiver(post_save, sender=Item)
@@ -22,8 +37,11 @@ def create_available(sender, instance, created, **kwargs):
 
 class Inbound(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    donator = models.ForeignKey(Donator, on_delete=models.CASCADE, null=True,blank=True)
     quantity = models.IntegerField(default=0)
     date = models.DateTimeField(default=timezone.now)
+    file = models.FileField(upload_to='inbound_files/', null=True,blank=True)
+    notes = models.TextField(max_length=1000,null=True,blank=True)
     def save(self, *args, **kwargs):
         super(Inbound, self).save(*args, **kwargs)
         try:
@@ -39,8 +57,11 @@ class Inbound(models.Model):
 
 class Outbound(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    case = models.ForeignKey(Case, on_delete=models.CASCADE, null=True,blank=True)
     quantity = models.IntegerField(default=0)
     date = models.DateTimeField(default=timezone.now)
+    file = models.FileField(upload_to='outbound_files/', null=True,blank=True)
+    notes = models.TextField(max_length=1000,null=True,blank=True)
     def save(self, *args, **kwargs):
         super(Outbound, self).save(*args, **kwargs)
         try:

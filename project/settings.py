@@ -1,9 +1,3 @@
-# verbose_name='عنوان الامتحان'
-# class Meta:
-#         verbose_name_plural = 'الامتحانات'
-#         ordering = ['created_at']
-
-
 
 from pathlib import Path
 
